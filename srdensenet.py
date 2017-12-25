@@ -16,12 +16,11 @@ def get_upsample_filter(size):
     return torch.from_numpy(filter).float()
 
 class _Dense_Block(nn.Module):
-    def __init__(self):
+    def __init__(self, channel_in):
         super(_Dense_Block, self).__init__()
 
         self.relu = nn.ReLU(inplace=True)
-        
-        self.conv1 = nn.Conv2d(in_channels=128, out_channels=16, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=channel_in, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(in_channels=32, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.conv4 = nn.Conv2d(in_channels=48, out_channels=16, kernel_size=3, stride=1, padding=1)
@@ -29,7 +28,7 @@ class _Dense_Block(nn.Module):
         self.conv6 = nn.Conv2d(in_channels=80, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.conv7 = nn.Conv2d(in_channels=96, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.conv8 = nn.Conv2d(in_channels=112, out_channels=16, kernel_size=3, stride=1, padding=1)
-                            
+        
     def forward(self, x):
         conv1 = self.relu(self.conv1(x))
 
@@ -61,25 +60,22 @@ class Net(nn.Module):
         super(Net, self).__init__()
         
         self.relu = nn.ReLU(inplace=True)
-
         self.lowlevel = nn.Conv2d(in_channels=1, out_channels=128, kernel_size=3, stride=1, padding=1)
-
+        self.bottleneck = nn.Conv2d(in_channels=1152, out_channels=256, kernel_size=1, stride=1, padding=0, bias=False)
         self.reconstruction = nn.Conv2d(in_channels=256, out_channels=1, kernel_size=3, stride=1, padding=1, bias=False)
-
-        self.denseblock1 = self.make_layer(_Dense_Block)
-        self.denseblock2 = self.make_layer(_Dense_Block)
-        self.denseblock3 = self.make_layer(_Dense_Block)
-        self.denseblock4 = self.make_layer(_Dense_Block)
-        self.denseblock5 = self.make_layer(_Dense_Block)
-        self.denseblock6 = self.make_layer(_Dense_Block)
-        self.denseblock7 = self.make_layer(_Dense_Block)
-        self.denseblock8 = self.make_layer(_Dense_Block)
-
-        self.upscale4x = nn.Sequential(
+        self.denseblock1 = self.make_layer(_Dense_Block, 128)
+        self.denseblock2 = self.make_layer(_Dense_Block, 256)
+        self.denseblock3 = self.make_layer(_Dense_Block, 384)
+        self.denseblock4 = self.make_layer(_Dense_Block, 512)
+        self.denseblock5 = self.make_layer(_Dense_Block, 640)
+        self.denseblock6 = self.make_layer(_Dense_Block, 768)
+        self.denseblock7 = self.make_layer(_Dense_Block, 896)
+        self.denseblock8 = self.make_layer(_Dense_Block, 1024)
+        self.deconv = nn.Sequential(
             nn.ConvTranspose2d(in_channels=256, out_channels=256, kernel_size=2, stride=2, padding=0, bias=False),
             nn.ReLU(inplace=True),
             nn.ConvTranspose2d(in_channels=256, out_channels=256, kernel_size=2, stride=2, padding=0, bias=False),
-            nn.ReLU(inplace=True),
+            nn.ReLU(inplace=True)
         )
 
         for m in self.modules():
@@ -95,38 +91,46 @@ class Net(nn.Module):
                 if m.bias is not None:
                     m.bias.data.zero_()
                     
-    def make_layer(self, block):
+    def make_layer(self, block, channel_in):
         layers = []
-        layers.append(block())
+        layers.append(block(channel_in))
         return nn.Sequential(*layers)
 
     def forward(self, x):    
         residual = self.relu(self.lowlevel(x))
 
         out = self.denseblock1(residual)
+        concat = torch.cat([residual,out], 1)
 
-        out = self.denseblock2(out)
+        out = self.denseblock2(concat)
+        concat = torch.cat([concat,out], 1)
 
-        out = self.denseblock3(out)
+        out = self.denseblock3(concat)
+        concat = torch.cat([concat,out], 1)
+        
+        out = self.denseblock4(concat)
+        concat = torch.cat([concat,out], 1)
+        
+        out = self.denseblock5(concat)
+        concat = torch.cat([concat,out], 1)
+        
+        out = self.denseblock6(concat)
+        concat = torch.cat([concat,out], 1)
+        
+        out = self.denseblock7(concat)
+        concat = torch.cat([concat,out], 1)
+        
+        out = self.denseblock8(concat)
+        out = torch.cat([concat,out], 1)
 
-        out = self.denseblock4(out)
+        out = self.bottleneck(out)
 
-        out = self.denseblock5(out)
-
-        out = self.denseblock6(out)
-
-        out = self.denseblock7(out)
-
-        out = self.denseblock8(out)
-
-        out = torch.cat([residual,out], 1)
-
-        out = self.upscale4x(out)
+        out = self.deconv(out)
 
         out = self.reconstruction(out)
        
         return out
-
+        
 class L1_Charbonnier_loss(nn.Module):
     """L1 Charbonnierloss."""
     def __init__(self):
@@ -137,4 +141,4 @@ class L1_Charbonnier_loss(nn.Module):
         diff = torch.add(X, -Y)
         error = torch.sqrt( diff * diff + self.eps )
         loss = torch.sum(error) 
-        return loss
+        return loss 
