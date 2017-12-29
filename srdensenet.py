@@ -19,7 +19,7 @@ class _Dense_Block(nn.Module):
     def __init__(self, channel_in):
         super(_Dense_Block, self).__init__()
 
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.PReLU()
         self.conv1 = nn.Conv2d(in_channels=channel_in, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(in_channels=16, out_channels=16, kernel_size=3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(in_channels=32, out_channels=16, kernel_size=3, stride=1, padding=1)
@@ -59,7 +59,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.PReLU()
         self.lowlevel = nn.Conv2d(in_channels=1, out_channels=128, kernel_size=3, stride=1, padding=1)
         self.bottleneck = nn.Conv2d(in_channels=1152, out_channels=256, kernel_size=1, stride=1, padding=0, bias=False)
         self.reconstruction = nn.Conv2d(in_channels=256, out_channels=1, kernel_size=3, stride=1, padding=1, bias=False)
@@ -73,9 +73,9 @@ class Net(nn.Module):
         self.denseblock8 = self.make_layer(_Dense_Block, 1024)
         self.deconv = nn.Sequential(
             nn.ConvTranspose2d(in_channels=256, out_channels=256, kernel_size=2, stride=2, padding=0, bias=False),
-            nn.ReLU(inplace=True),
+            nn.PReLU(),
             nn.ConvTranspose2d(in_channels=256, out_channels=256, kernel_size=2, stride=2, padding=0, bias=False),
-            nn.ReLU(inplace=True)
+            nn.PReLU()
         )
 
         for m in self.modules():

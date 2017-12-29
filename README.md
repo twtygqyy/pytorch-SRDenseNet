@@ -45,9 +45,9 @@ python main.py --cuda
   
 | Dataset        | SRDenseNet Paper          | SRDenseNet PyTorch|
 | ------------- |:-------------:| -----:|
-| Set5      | 32.02      | **31.38** |
-| Set14     | 28.50      | **28.22** |
-| BSD100    | 27.53      | **27.29** |
+| Set5      | 32.02      | **31.56** |
+| Set14     | 28.50      | **28.36** |
+| BSD100    | 27.53      | **27.38** |
 
 ### Misc.
-  - L1 Charbonnier loss from [Deep Laplacian Pyramid Networks for Fast and Accurate Super-Resolution](https://arxiv.org/abs/1704.03915) is applied instead of MSE loss
+  - L1 Charbonnier loss from [Deep Laplacian Pyramid Networks for Fast and Accurate Super-Resolution](https://arxiv.org/abs/1704.03915) is applied instead of MSE loss, and PReLu is applied instead of ReLu due to gradient vanishing.
