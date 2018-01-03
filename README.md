@@ -45,7 +45,7 @@ python main.py --cuda
   
 | Dataset        | SRDenseNet Paper          | SRDenseNet PyTorch|
 | ------------- |:-------------:| -----:|
-| Set5      | 32.02      | **31.56** |
+| Set5      | 32.02      | **31.58** |
 | Set14     | 28.50      | **28.36** |
 | BSD100    | 27.53      | **27.38** |
 
