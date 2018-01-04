@@ -36,6 +36,43 @@ An example of training usage is shown as follows:
 python main.py --cuda
 ```
 
+### Evaluation
+```
+usage: eval.py [-h] [--cuda] [--model MODEL] [--dataset DATASET]
+               [--scale SCALE]
+
+PyTorch SRDenseNet Eval
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --cuda             use cuda?
+  --model MODEL      model path
+  --dataset DATASET  dataset name, Default: Set5
+  --scale SCALE      scale factor, Default: 4
+```
+An example of training usage is shown as follows:
+```
+python eval.py --cuda
+```
+
+### Demo
+```
+usage: demo.py [-h] [--cuda] [--model MODEL] [--image IMAGE] [--scale SCALE]
+
+PyTorch SRDenseNet Test
+
+optional arguments:
+  -h, --help     show this help message and exit
+  --cuda         use cuda?
+  --model MODEL  model path
+  --image IMAGE  image name
+  --scale SCALE  scale factor, Default: 4
+```
+An example of training usage is shown as follows:
+```
+python demo.py --model model_adam/model_epoch_60.pth --image butterfly_GT --scale 4 --cuda
+```
+
 ### Prepare Training dataset
   - Please refer [Code for Data Generation](https://github.com/twtygqyy/pytorch-SRResNet/tree/master/data) for creating training files.
   - Data augmentations including flipping, rotation, downsizing are adopted.
