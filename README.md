@@ -50,7 +50,7 @@ optional arguments:
   --dataset DATASET  dataset name, Default: Set5
   --scale SCALE      scale factor, Default: 4
 ```
-An example of training usage is shown as follows:
+An example of evalutation usage is shown as follows:
 ```
 python eval.py --cuda
 ```
@@ -68,7 +68,7 @@ optional arguments:
   --image IMAGE  image name
   --scale SCALE  scale factor, Default: 4
 ```
-An example of training usage is shown as follows:
+An example of demo usage is shown as follows:
 ```
 python demo.py --model model_adam/model_epoch_60.pth --image butterfly_GT --scale 4 --cuda
 ```
