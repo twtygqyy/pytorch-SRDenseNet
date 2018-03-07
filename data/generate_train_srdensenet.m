@@ -1,6 +1,7 @@
 clear;
 close all;
-folder = 'path/to/imagenet/folder';
+folder = '/data0/xujiu/datasets/coco/images/train2014';
+%folder = 'path/to/imagenet/folder';
 
 savepath = 'srdensenet_x4.h5';
 
@@ -11,7 +12,7 @@ size_label = 128;
 size_input = size_label/scale;
 stride = 128;
 
-data = zeros(size_input/4, size_input/4, 1, 1);
+data = zeros(size_input, size_input, 1, 1);
 label = zeros(size_label, size_label, 1, 1);
 
 count = 0;
@@ -20,6 +21,9 @@ margain = 0;
 %% generate data change image format to according to your image type
 filepaths = [];
 filepaths = [filepaths; dir(fullfile(folder, '*.JPEG'))];
+filepaths = [filepaths; dir(fullfile(folder, '*.jpg'))];
+filepaths = [filepaths; dir(fullfile(folder, '*.bmp'))];
+filepaths = [filepaths; dir(fullfile(folder, '*.png'))];
 
 length(filepaths)
 
@@ -34,8 +38,8 @@ for i = 1 : length(filepaths)
         filepaths(i).name
         for x = 1 + margain : stride : hei-size_label+1 - margain
             for y = 1 + margain :stride : wid-size_label+1 - margain
-                subim_label = im_label(x : x+size_input-1, y : y+size_input-1);
-                subim_input = imresize(subim_label,1/scale(s),'bicubic');
+                subim_label = im_label(x : x+size_label-1, y : y+size_label-1);
+                subim_input = imresize(subim_label,1/scale,'bicubic');
 
                 count=count+1;
                 data(:, :, 1, count) = subim_input;
